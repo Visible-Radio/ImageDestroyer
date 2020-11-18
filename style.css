@@ -11,53 +11,29 @@ canvas {
 	display: none;
 }
 
-/*128 x 97 for this rough and ready test*/
-.bannerMask {
-	position:absolute;	
-	width: 768px;	
-	background-color: #141a2b;
-}
-
 .layoutContainer {
 	position:relative;
 	display: flex;
 	flex-wrap: wrap;
-	width: 768px;
-	height: 582px;
+	width: 1920px;
+	height: 1455;
 	background-color: #02210f;
 	z-index: -3;	
 }
 
-
 .gridContainer {	
 	display: flex;
 	flex-wrap: wrap;
-	width: 768px;
-	height: 582px;
+	width: 1920px;
+	height: 1455px;
 }
 
 .bigPixel {		
-	border-top: 4px solid #141a2b;	
-	width: 6px;
-	height: 2px;	
+	border-top: 10px solid #141a2b;	
+	width: 15px;
+	height: 5px;	
 }
 
-.banner {
-	display: flex;
-	justify-content: center;
-	align-items: flex-end;
-	width: 768px;		
-	position: absolute;
-	top: 450px;
-	color: #8c8c8c;
-	/*background-color: #141a2b;*/
-	font-size: 100px;
-	z-index: -2;
-	font-family: 'Permanent Marker', cursive;
+
 	
 
-}
-
-.span {
-
-}

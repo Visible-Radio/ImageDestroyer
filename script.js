@@ -4,21 +4,14 @@
 // take an input image
 // convert it to grayscale
 // downsample it to fit in our archaic display
+// target resolution is 128px wide
 
 // reduce the gamut - ie, only 64 discrete values
 // control colors etc in css 
 
-
-// let canvas = document.getElementById('tutorial');
-// let ctx = canvas.getContext('2d');
-
-// drawImage(image, x, y, width, height)
-// This adds the width and height parameters, which indicate the size to which to scale the image when drawing it onto the canvas.
-
-
 const ctx = document.getElementById('canvas').getContext('2d');
 const img = new Image();
-img.src = 'rhino.jpg';
+img.src = './images/cosmonaut.jpg';
 img.onload = function() {
 	ctx.drawImage(img, 0, 0, 128, 97); // image, x, y, width, height
   const imageData = ctx.getImageData(0, 0, 128, 97);
@@ -27,7 +20,7 @@ img.onload = function() {
 	divDisplay = Array.from(gridContainer.children);
 	// displayDraw(divDisplay, destroyedImg);
 	
-	timerId = setInterval(slowDraw, 30, divDisplay, destroyedImg, counter);
+	timerId = setInterval(slowDraw, 50, divDisplay, destroyedImg, counter);
  };
 
 
@@ -53,7 +46,7 @@ function destroyImg(imageData) {
 }
 
 
-// 256 x 194 div grid
+// 128 x 97 div grid
 
 const gridContainer = document.querySelector('.gridContainer');
 
@@ -73,7 +66,7 @@ function displayDraw(divDisplay, destroyedImg) {
 
 let counter = 0;
 function slowDraw(divDisplay, destroyedImg, drawIndex){
-	for (let i = 0; i < 50; i++) {
+	for (let i = 0; i < 150; i++) {
 		counter++;
 		divDisplay[counter].style = `background-color: rgba(${destroyedImg[counter]}, ${destroyedImg[counter]}, ${destroyedImg[counter]}, 1);`
 		if (counter === destroyedImg.length-1) {
@@ -98,7 +91,12 @@ function slowDraw(divDisplay, destroyedImg, drawIndex){
 // tint the grayscale
 
 // grab images from somewhere automatically
+	// something Dr. Strangelove related => "world targets in megadeaths"
 
+// exportale HTML => image to HTML/CSS
 
+// process video...on the fly? make gnarly looking video?
+
+//clean this dang code up
 
 
