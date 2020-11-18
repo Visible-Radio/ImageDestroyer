@@ -11,7 +11,7 @@
 
 const ctx = document.getElementById('canvas').getContext('2d');
 const img = new Image();
-img.src = './images/cosmonaut.jpg';
+img.src = 'cosmonaut.jpg';
 img.onload = function() {
 	ctx.drawImage(img, 0, 0, 128, 97); // image, x, y, width, height
   const imageData = ctx.getImageData(0, 0, 128, 97);
