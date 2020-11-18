@@ -1,7 +1,8 @@
 body {
 	display: flex;
 	justify-content: center;
-	align-items: center;	
+	/*align-items: center;*/
+	/*height: 100vh;*/
 	background-color: #141a2b;
 	overflow-x: hidden;
 	overflow-y: hidden;
@@ -14,9 +15,7 @@ canvas {
 .layoutContainer {
 	position:relative;
 	display: flex;
-	flex-wrap: wrap;
-	width: 1920px;
-	height: 1455;
+	flex-wrap: wrap;	
 	background-color: #02210f;
 	z-index: -3;	
 }
@@ -24,16 +23,29 @@ canvas {
 .gridContainer {	
 	display: flex;
 	flex-wrap: wrap;
-	width: 1920px;
-	height: 1455px;
+	width: var(--gridContainerWidth);
+	/*height: 1215px;*/
 }
 
-.bigPixel {		
-	border-top: 10px solid #141a2b;	
-	width: 15px;
-	height: 5px;	
+.bigPixel {	
+	border-top: var(--interlaceWidth);
+	width: var(--bigPixelWidth);
+	height: var(--bigPixelHeight);	
 }
 
+/* to scale, adjust in the some proportion
+	.gridContainer width
+	.bigPixel width
+	.bigPixel height
+	.bigPixel border-top
+	variables manipulated from script
+*/
+:root {
+	--gridContainerWidth: 768px;
+	--bigPixelWidth: 6px;
+	--bigPixelHeight: 2px;
+	--interlaceWidth: 4px solid #141a2b;
+}
 
 	
 

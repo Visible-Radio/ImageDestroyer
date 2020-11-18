@@ -1,26 +1,39 @@
-// create a pixel display of divs
-// style them like they are LEDs or some lo-fi display tech
+// support for different size images
+// always 128 wide, but scale height appropriately 
 
-// take an input image
-// convert it to grayscale
-// downsample it to fit in our archaic display
-// target resolution is 128px wide
-
-// reduce the gamut - ie, only 64 discrete values
-// control colors etc in css 
-
-const ctx = document.getElementById('canvas').getContext('2d');
 const img = new Image();
-img.src = 'cosmonaut.jpg';
+img.src = './images/cosmonaut.jpg';
+
 img.onload = function() {
-	ctx.drawImage(img, 0, 0, 128, 97); // image, x, y, width, height
-  const imageData = ctx.getImageData(0, 0, 128, 97);
-  destroyedImg = destroyImg(imageData); // ARRAY CREATED AS SIDE EFFECT
-  createDisplay(destroyedImg.length);
-	divDisplay = Array.from(gridContainer.children);
-	// displayDraw(divDisplay, destroyedImg);
+	// get the canvas context
+	const ctx = document.getElementById('canvas').getContext('2d');
+	const targetWidth = 128;
+	const scaleFactor = img.width / 128;
+	const targetHeight = img.height / scaleFactor;
+
+	// scaling happens here based on second pair of args
+	// this draws the image onto the canvas, which is hidden using CSS
+	ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+	// retrieve the pixel data from the canvas
+  const imageData = ctx.getImageData(0, 0, targetWidth, targetHeight);
+  
+  // run the functions that reduce the bit depth and convert to grayscale  
+  const destroyedImg = destroyImg(imageData);
+
+  // for each pixel create a div
+  const divDisplay = createDisplay(destroyedImg.length);
 	
-	timerId = setInterval(slowDraw, 50, divDisplay, destroyedImg, counter);
+	// color the divs based on the values from the image
+	displayDraw(divDisplay, destroyedImg);
+
+	// change the output size of the resultant image	
+	scaleDivs(2.5);
+
+	console.log('Scale factor: ', scaleFactor);
+  console.log('Target width constant : ', targetWidth);
+  console.log('Target height calc: ', targetHeight);
+  console.log(imageData);	
  };
 
 
@@ -39,64 +52,61 @@ function avgChannels(channels) {
 function destroyImg(imageData) {
 	let destroyedImg = [];
 	for (let i=0; i < imageData.data.length; i+=4) {
-	const channels = bitReduceChannels([imageData.data[i], imageData.data[i+1], imageData.data[i+2]]);
-	destroyedImg.push(avgChannels(channels));
+	const channels = bitReduceChannels([
+		imageData.data[i],
+		imageData.data[i+1],
+		imageData.data[i+2]
+		]);
+		destroyedImg.push(avgChannels(channels));
 	}
 	return destroyedImg;
 }
 
-
-// 128 x 97 div grid
-
+// build the display grid
 const gridContainer = document.querySelector('.gridContainer');
-
 function createDisplay(imgArrLength) {
 	for (let i = 0; i < imgArrLength; i++) {		
 		let div = document.createElement('div');
 		gridContainer.appendChild(div);
 		div.classList.add('bigPixel');		
-	}		
+	}
+	return Array.from(gridContainer.children);
 }
 
+// color each div with the color value from the manipulated image array
+// could apply tinting here as each color channel gets written
 function displayDraw(divDisplay, destroyedImg) {
 	divDisplay.forEach((div,i) => {
-		div.style=`background-color: rgba(${destroyedImg[i]}, ${destroyedImg[i]}, ${destroyedImg[i]}, 1);`	
+		div.style=`background-color: rgba(
+		${destroyedImg[i]},
+		${destroyedImg[i]},
+		${destroyedImg[i]},
+		1);`	
 	});
 }
 
-let counter = 0;
-function slowDraw(divDisplay, destroyedImg, drawIndex){
-	for (let i = 0; i < 150; i++) {
-		counter++;
-		divDisplay[counter].style = `background-color: rgba(${destroyedImg[counter]}, ${destroyedImg[counter]}, ${destroyedImg[counter]}, 1);`
-		if (counter === destroyedImg.length-1) {
-			clearInterval(timerId);
-			return;		
-		}
-	}
-	
-	
+// Manipulate CSS variables to scale the divs
+function scaleDivs(divScale = 1, warpOffset = 0){		
+	const gridContainerWidth = 768 * divScale + warpOffset;
+	const bigPixelWidth = 6 * divScale;
+	const bigPixelHeight = 2 * divScale;
+	const interlaceWidth = 4 * divScale;
+	document.documentElement.style.setProperty(
+		`--gridContainerWidth`,
+		gridContainerWidth + 'px');
+	document.documentElement.style.setProperty(
+		`--bigPixelWidth`,
+		bigPixelWidth + 'px');
+	document.documentElement.style.setProperty(
+		`--bigPixelHeight`,
+		bigPixelHeight + 'px');
+	document.documentElement.style.setProperty(
+		`--interlaceWidth`,
+		interlaceWidth + 'px ' + 'solid #141a2b');
 }
 
 
-// challenges
-// use setInterval to slow down the process of coloring the divs
 
-// handling for images of different dimensions
-// handling for different images period...
 
-// scale the image down more
-// 128 wide looks pretty good
-
-// tint the grayscale
-
-// grab images from somewhere automatically
-	// something Dr. Strangelove related => "world targets in megadeaths"
-
-// exportale HTML => image to HTML/CSS
-
-// process video...on the fly? make gnarly looking video?
-
-//clean this dang code up
 
 
