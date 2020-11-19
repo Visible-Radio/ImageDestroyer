@@ -2,7 +2,7 @@
 // always 128 wide, but scale height appropriately 
 
 const img = new Image();
-img.src = './images/cosmonaut.jpg';
+img.src = './images/spaceman.jpg';
 
 img.onload = function() {
 	// get the canvas context
@@ -11,7 +11,7 @@ img.onload = function() {
 	const scaleFactor = img.width / 128;
 	const targetHeight = img.height / scaleFactor;
 
-	// scaling happens here based on second pair of args
+	// input scaling happens here based on second pair of args
 	// this draws the image onto the canvas, which is hidden using CSS
 	ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
 
@@ -25,10 +25,13 @@ img.onload = function() {
   const divDisplay = createDisplay(destroyedImg.length);
 	
 	// color the divs based on the values from the image
-	displayDraw(divDisplay, destroyedImg);
+	// call displayDrawMono for monocrhome image
+	displayDraw1(divDisplay, destroyedImg);
 
 	// change the output size of the resultant image	
-	scaleDivs(2.5);
+	// scaleDivs(2);
+
+	
 
 	console.log('Scale factor: ', scaleFactor);
   console.log('Target width constant : ', targetWidth);
@@ -73,18 +76,6 @@ function createDisplay(imgArrLength) {
 	return Array.from(gridContainer.children);
 }
 
-// color each div with the color value from the manipulated image array
-// could apply tinting here as each color channel gets written
-function displayDraw(divDisplay, destroyedImg) {
-	divDisplay.forEach((div,i) => {
-		div.style=`background-color: rgba(
-		${destroyedImg[i]},
-		${destroyedImg[i]},
-		${destroyedImg[i]},
-		1);`	
-	});
-}
-
 // Manipulate CSS variables to scale the divs
 function scaleDivs(divScale = 1, warpOffset = 0){		
 	const gridContainerWidth = 768 * divScale + warpOffset;
@@ -105,8 +96,70 @@ function scaleDivs(divScale = 1, warpOffset = 0){
 		interlaceWidth + 'px ' + 'solid #141a2b');
 }
 
+//========================Various Drawing Functions==============================//
+//displayDrawMono produces grayscale image
+//displayDraw0 produces a very nice, but static pattern on the imgage
+//display Draw1 produces randomized artifacts in the image
 
+function displayDraw1(divDisplay, destroyedImg) {
+	let modR = 0;
+	let modG = 0;
+	let modB = 0;
+	const rand1 = rndNum(15);		
+	const rand2 = rndNum(15);		
+	divDisplay.forEach((div,i) => {
+		let monoValue = destroyedImg[i];
+		
+		if (monoValue % (rand1 * 5) === 0
+			|| monoValue % (rand1 * 3) === 0 ) modR = rndNum(100);
+		if (monoValue % (rand2 * 3) === 0 ) modG = -rndNum(100);
+		if (monoValue < 30) monoValue -= 20;
+		div.style=`background-color: rgba(
+		${monoValue + modR - modG},
+		${monoValue - (modR/2)},
+		${monoValue + modG},
+		1);`
+		modR-=5;
+		modG+=15;
+		if (modR <= -55 || modR >= 150) modR = 0;
+		if (modG >= 100 || modG <= -100) modG = 0;
+		
+	});
+}
 
+function displayDraw0(divDisplay, destroyedImg) {
+	let modR = 0;
+	let modG = 0;
+	let modB = 0;	
+	divDisplay.forEach((div,i) => {
+		const monoValue = destroyedImg[i];
+		if (i % 101 === 0 ) modR = 255;
+		if (i % 86 === 0 ) modG = -100;
+		div.style=`background-color: rgba(
+		${monoValue + modR - modG},
+		${monoValue - (modR/2)},
+		${monoValue + modG},
+		1);`
+		modR-=30;
+		modG+=10;
+		if (modR <= -55) modR = 0;
+		if (modG >= 100) modG = 0;
+		
+	});
+}
 
+function displayDrawMono(divDisplay, destroyedImg) {
+	divDisplay.forEach((div,i) => {
+		const monoValue = destroyedImg[i];		
+		div.style=`background-color: rgba(
+		${monoValue},
+		${monoValue},
+		${monoValue},
+		1);`		
+	});
+}
 
-
+function rndNum(limit) {
+	return Math.round(Math.random()*limit);	
+}
+//======================END OF DRAWING FUNCTIONS==============================//
