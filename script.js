@@ -88,11 +88,11 @@ img.onload = function() {
 
 	// set the height of the container so when items don't fit, we can hide them
 	// with overflowy: hidden;	
-	const gridContainerHeight = (4 + 8) * parseInt(targetHeight);
+	const gridContainerHeight = (2 + 4) * parseInt(targetHeight);
 	document.documentElement.style.setProperty(
 		`--gridContainerHeight`, gridContainerHeight + 'px');
 
-	const gridContainerWidthLeft = 12 * targetWidth;
+	const gridContainerWidthLeft = 6 * targetWidth;
 	document.documentElement.style.setProperty(
 		`--gridContainerWidthLeft`, gridContainerWidthLeft + 'px');	
  };
