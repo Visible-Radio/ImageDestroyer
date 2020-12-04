@@ -1,15 +1,71 @@
-// support for different size images
-// always 128 wide, but scale height appropriately 
+// break image open
+// gridContainer.children[(parseInt(gridContainer.childElementCount/2))].style.setProperty(`margin-top`, 128 +`px`);
 
+//========================API NOTES==========================//
+
+// GET https://images-api.nasa.gov
+// GET /search?q={q}
+// &media_type=image specifies images only
+// &year_end=1991 specifies newest date
+// search?q=station specifies search string, in this case "station"
+
+//=============Availavle in the response object==============//
+// respObj.collection.items[0].links[0].href; // this is a thumbnail
+// respObj.collection.items[0].data[0].description;
+// respObj.collection.items[0].data[0].title;
+// respObj.collection.items[0].data[0].location;
+// respObj.collection.items[0].data[0].date_created;
+// respObj.collection.items[0].href;
+//===========================================================//
+
+// (async () => {
+//======================GET THE SOURCE IMAGE=================//	
 const img = new Image();
-img.src = './images/spaceman.jpg';
+// canvass doesn't like cross origin content
+// setting this prevents some errors
+img.setAttribute('crossOrigin', '');
 
+	async function getImageCollection() {
+		try {	
+				return await fetch(
+					"https://images-api.nasa.gov/search?q=station&media_type=image&year_end=1991")		
+		} catch(e) {
+				// API request failed, use local fallback
+				console.log("Caught this error:", e);
+				return e;	
+		}
+	}
+
+	let srcIndex = 16;
+	async function handleRender() {
+		let respObj;	
+		await getImageCollection().then(response => response.json()).then(response => respObj = response.collection.items);
+		console.log(respObj.length);
+		console.log(srcIndex);
+		console.log(respObj[srcIndex].links[0].href);
+		img.src = `${respObj[srcIndex].links[0].href}` + '?' + new Date().getTime();
+		document.querySelector('.gridContainer').style.setProperty('transition-property', 'none');
+		document.documentElement.style.setProperty(
+		`--gridContainerWidthLeft`, 0 + 'px');
+
+		destroyDisplay();
+		Main();
+		srcIndex = respObj.length-1 > srcIndex ? srcIndex + 1 : 0;
+	}
+	handleRender();
+
+
+
+function Main() {
+// ======================== Main Program ====================//
 img.onload = function() {
 	// get the canvas context
 	const ctx = document.getElementById('canvas').getContext('2d');
-	const targetWidth = 128;
-	const scaleFactor = img.width / 128;
-	const targetHeight = img.height / scaleFactor;
+	// set up the final output width of the destroyed image
+	// keep image aspect ratio intact
+	const targetWidth = 128; 
+	const scaleFactor = img.width / targetWidth;
+	const targetHeight = img.height / scaleFactor; 
 
 	// input scaling happens here based on second pair of args
 	// this draws the image onto the canvas, which is hidden using CSS
@@ -22,52 +78,65 @@ img.onload = function() {
   const destroyedImg = destroyImg(imageData);
 
   // for each pixel create a div
-  const divDisplay = createDisplay(destroyedImg.length);
-	
+  const gridContainer = document.querySelector('.gridContainer');
+  const divDisplay = createDisplay(destroyedImg.length, gridContainer);
+  console.log(gridContainer.childElementCount);
+
 	// color the divs based on the values from the image
-	// call displayDrawMono for monocrhome image
+	document.querySelector('.gridContainer').style.setProperty('transition-property', 'width');	
 	displayDraw1(divDisplay, destroyedImg);
 
-	// change the output size of the resultant image	
-	// scaleDivs(2);
+	// set the height of the container so when items don't fit, we can hide them
+	// with overflowy: hidden;	
+	const gridContainerHeight = (4 + 8) * parseInt(targetHeight);
+	document.documentElement.style.setProperty(
+		`--gridContainerHeight`, gridContainerHeight + 'px');
 
-	
-
-	console.log('Scale factor: ', scaleFactor);
-  console.log('Target width constant : ', targetWidth);
-  console.log('Target height calc: ', targetHeight);
-  console.log(imageData);	
+	const gridContainerWidthLeft = 12 * targetWidth;
+	document.documentElement.style.setProperty(
+		`--gridContainerWidthLeft`, gridContainerWidthLeft + 'px');	
  };
 
+ // =====================End Main Program ====================//
+}
+
+function destroyDisplay() {
+	document.querySelectorAll('.bigPixel').forEach(node => node.remove());
+}
 
 function bitReduce(channel) {
+	// each pixel channel value gets mapped to a smaller gamut
 	return parseInt((channel / 255) * 127)*2;
 }
 
 function bitReduceChannels(channels) {
+	// reduce the bit depth of the image
 	return channels.map(channel => bitReduce(channel));
 }
 
 function avgChannels(channels) {
+	// simple grayscale conversion by averaging
 	return parseInt(channels.reduce((acc, channel) => acc += channel, 0) /3);	
 }
 
 function destroyImg(imageData) {
-	let destroyedImg = [];
+	// iterate over the pixel data from the canvas	
+	let destroyedImg = [];	
 	for (let i=0; i < imageData.data.length; i+=4) {
+	// pass each RGB triplet to bitReduceChannels
 	const channels = bitReduceChannels([
 		imageData.data[i],
 		imageData.data[i+1],
 		imageData.data[i+2]
 		]);
+	// pass each RGB triplet to avgChannels and append to new array
 		destroyedImg.push(avgChannels(channels));
 	}
 	return destroyedImg;
 }
 
 // build the display grid
-const gridContainer = document.querySelector('.gridContainer');
-function createDisplay(imgArrLength) {
+function createDisplay(imgArrLength, gridContainer) {
 	for (let i = 0; i < imgArrLength; i++) {		
 		let div = document.createElement('div');
 		gridContainer.appendChild(div);
@@ -77,29 +146,31 @@ function createDisplay(imgArrLength) {
 }
 
 // Manipulate CSS variables to scale the divs
-function scaleDivs(divScale = 1, warpOffset = 0){		
-	const gridContainerWidth = 768 * divScale + warpOffset;
-	const bigPixelWidth = 6 * divScale;
-	const bigPixelHeight = 2 * divScale;
-	const interlaceWidth = 4 * divScale;
+function scaleDivs(divScale = 1){
+	const cssVars = {
+		divScale: divScale,
+		gridContainerWidth: 1536 * divScale,
+		bigPixelWidth: 12 * divScale,
+		bigPixelHeight: 4 * divScale,
+		interlaceWidth: 8 * divScale,
+	}	
 	document.documentElement.style.setProperty(
 		`--gridContainerWidth`,
-		gridContainerWidth + 'px');
+		cssVars.gridContainerWidth + 'px');
 	document.documentElement.style.setProperty(
 		`--bigPixelWidth`,
-		bigPixelWidth + 'px');
+		cssVars.bigPixelWidth + 'px');
 	document.documentElement.style.setProperty(
 		`--bigPixelHeight`,
-		bigPixelHeight + 'px');
+		cssVars.bigPixelHeight + 'px');
 	document.documentElement.style.setProperty(
 		`--interlaceWidth`,
-		interlaceWidth + 'px ' + 'solid #141a2b');
+		cssVars.interlaceWidth + 'px ' + 'solid #141a2b');
+
+	return cssVars;
 }
 
-//========================Various Drawing Functions==============================//
-//displayDrawMono produces grayscale image
-//displayDraw0 produces a very nice, but static pattern on the imgage
-//display Draw1 produces randomized artifacts in the image
+//========================Drawing Functions==============================//
 
 function displayDraw1(divDisplay, destroyedImg) {
 	let modR = 0;
@@ -127,39 +198,8 @@ function displayDraw1(divDisplay, destroyedImg) {
 	});
 }
 
-function displayDraw0(divDisplay, destroyedImg) {
-	let modR = 0;
-	let modG = 0;
-	let modB = 0;	
-	divDisplay.forEach((div,i) => {
-		const monoValue = destroyedImg[i];
-		if (i % 101 === 0 ) modR = 255;
-		if (i % 86 === 0 ) modG = -100;
-		div.style=`background-color: rgba(
-		${monoValue + modR - modG},
-		${monoValue - (modR/2)},
-		${monoValue + modG},
-		1);`
-		modR-=30;
-		modG+=10;
-		if (modR <= -55) modR = 0;
-		if (modG >= 100) modG = 0;
-		
-	});
-}
-
-function displayDrawMono(divDisplay, destroyedImg) {
-	divDisplay.forEach((div,i) => {
-		const monoValue = destroyedImg[i];		
-		div.style=`background-color: rgba(
-		${monoValue},
-		${monoValue},
-		${monoValue},
-		1);`		
-	});
-}
-
 function rndNum(limit) {
 	return Math.round(Math.random()*limit);	
 }
 //======================END OF DRAWING FUNCTIONS==============================//
+ // })();

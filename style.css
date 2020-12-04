@@ -1,51 +1,47 @@
 body {
 	display: flex;
 	justify-content: center;
-	/*align-items: center;*/
-	/*height: 100vh;*/
-	background-color: #141a2b;
-	overflow-x: hidden;
-	overflow-y: hidden;
+	align-items: center;
+	height: 100vh;
+	background-color: #090519;
+	overflow-x: hidden;	
 }
 
 canvas {
 	display: none;
 }
 
-.layoutContainer {
-	position:relative;
-	display: flex;
-	flex-wrap: wrap;	
-	background-color: #02210f;
-	z-index: -3;	
+.layoutContainer {	
+	position:relative;	
+	z-index: 1;
+	width: var(--gridContainerWidthLeft);
+	border: 5px solid #651c1c;
+	height: var(--gridContainerHeight);	
 }
 
 .gridContainer {	
 	display: flex;
-	flex-wrap: wrap;
-	width: var(--gridContainerWidth);
-	/*height: 1215px;*/
+	flex-wrap: wrap;	
+	transition-property: width;
+	transition-duration: 10s;
+	transition-timing-function: linear;
+	width: var(--gridContainerWidthLeft);
+	height: var(--gridContainerHeight);
+	overflow-y: hidden;
 }
 
 .bigPixel {	
-	border-top: var(--interlaceWidth);
+	border-top: var(--interlaceWidth);	
 	width: var(--bigPixelWidth);
 	height: var(--bigPixelHeight);	
 }
 
-/* to scale, adjust in the some proportion
-	.gridContainer width
-	.bigPixel width
-	.bigPixel height
-	.bigPixel border-top
-	variables manipulated from script
-*/
 :root {
-	--gridContainerWidth: 768px;
-	--bigPixelWidth: 6px;
-	--bigPixelHeight: 2px;
-	--interlaceWidth: 4px solid #141a2b;
+	--gridContainerWidthLeft: 0;	
+	--gridContainerHeight: 0; 	 
+	--bigPixelWidth: 12px;
+	--bigPixelHeight: 4px;
+	--interlaceWidth: 8px solid #141a2b;
 }
 
-	
 
