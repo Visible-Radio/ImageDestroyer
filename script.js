@@ -36,7 +36,7 @@ img.setAttribute('crossOrigin', '');
 		}
 	}
 
-	let srcIndex = 16;
+	let srcIndex = 35;
 	async function handleRender() {
 		let respObj;	
 		await getImageCollection().then(response => response.json()).then(response => respObj = response.collection.items);
@@ -52,6 +52,10 @@ img.setAttribute('crossOrigin', '');
 		Main();
 		srcIndex = respObj.length-1 > srcIndex ? srcIndex + 1 : 0;
 	}
+
+	const button = document.querySelector('button');
+	button.addEventListener('click', handleRender);
+
 	handleRender();
 
 

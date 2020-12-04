@@ -1,5 +1,6 @@
 body {
 	display: flex;
+	flex-direction: column;
 	justify-content: center;
 	align-items: center;
 	height: 90vh;
@@ -11,12 +12,25 @@ canvas {
 	display: none;
 }
 
+.outerContainer {
+	display: flex;
+	flex-direction: column;
+}
+
+.border {
+	display: flex;
+	flex-direction: column;
+	border: 3px solid #651c1c;
+	padding: 2px;	
+}
+
 .layoutContainer {	
 	position:relative;	
 	z-index: 1;
 	width: var(--gridContainerWidthLeft);
-	border: 5px solid #651c1c;
 	height: var(--gridContainerHeight);	
+	border: 5px solid #651c1c;		
+	padding: 5px;	
 }
 
 .gridContainer {	
@@ -27,7 +41,7 @@ canvas {
 	transition-timing-function: linear;
 	width: var(--gridContainerWidthLeft);
 	height: var(--gridContainerHeight);
-	overflow-y: hidden;
+	overflow-y: hidden;	
 }
 
 .bigPixel {	
@@ -35,6 +49,32 @@ canvas {
 	width: var(--bigPixelWidth);
 	height: var(--bigPixelHeight);	
 }
+
+button {
+	font-size: 24px;
+	color: #904646;
+	background-color: #651c1c;	
+	outline: none;
+	width: 200px;
+	height: 50px;	
+	margin: 0;
+	letter-spacing: 4px;	
+}
+
+
+
+.btnContainer {
+	display:flex;
+	align-self: center;
+	align-items: center;		
+	border: 5px solid #651c1c;
+	background-color: #000000;
+	padding: 3px;
+	margin: 3px;
+	border-radius: 2px;
+	margin-top: 5px;
+}
+
 
 :root {
 	--gridContainerWidthLeft: 0;	
