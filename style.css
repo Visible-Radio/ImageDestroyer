@@ -4,8 +4,8 @@ body {
 	justify-content: center;
 	align-items: center;
 	height: 90vh;
-	background-color: #090519;
-	overflow-x: hidden;	
+	background-color: #151c31;
+	/*overflow-x: hidden;	*/
 }
 
 canvas {
@@ -15,12 +15,16 @@ canvas {
 .outerContainer {
 	display: flex;
 	flex-direction: column;
+	border: 3px solid var(--uiColor);
+	padding: 20px;
+	background-color: black;
+	border-radius: 2% 2% 10% 10%;	
 }
 
 .border {
 	display: flex;
 	flex-direction: column;
-	border: 3px solid #651c1c;
+	border: 3px solid var(--uiColor);
 	padding: 2px;	
 }
 
@@ -29,7 +33,7 @@ canvas {
 	z-index: 1;
 	width: var(--gridContainerWidthLeft);
 	height: var(--gridContainerHeight);	
-	border: 5px solid #651c1c;		
+	border: 5px solid var(--uiColor);	
 	padding: 5px;	
 }
 
@@ -37,42 +41,57 @@ canvas {
 	display: flex;
 	flex-wrap: wrap;	
 	transition-property: width;
-	transition-duration: 10s;
+	transition-duration: 2s;
 	transition-timing-function: linear;
 	width: var(--gridContainerWidthLeft);
 	height: var(--gridContainerHeight);
-	overflow-y: hidden;	
+	overflow-y: hidden;
+	background-color: #36d28a;
 }
 
-.bigPixel {	
+.bigPixel {
+	opacity: 1;
 	border-top: var(--interlaceWidth);	
 	width: var(--bigPixelWidth);
 	height: var(--bigPixelHeight);	
 }
 
+.textPixel {	
+	opacity: 0;	
+}
+
+
+
+.navBox {
+	display: flex;	
+	justify-content: center;
+}
+
 button {
 	font-size: 24px;
-	color: #904646;
-	background-color: #651c1c;	
-	outline: none;
-	width: 200px;
+	color: #218875;
+	background-color: var(--uiColor);	
+	outline: none;	
 	height: 50px;	
 	margin: 0;
 	letter-spacing: 4px;	
 }
 
-
+span {
+	margin-left: 10px;
+	margin-right: 10px;
+}
 
 .btnContainer {
 	display:flex;
 	align-self: center;
 	align-items: center;		
-	border: 5px solid #651c1c;
+	border: 3px solid var(--uiColor);
 	background-color: #000000;
 	padding: 3px;
 	margin: 3px;
 	border-radius: 2px;
-	margin-top: 5px;
+	margin-top: 20px;
 }
 
 
@@ -82,6 +101,7 @@ button {
 	--bigPixelWidth: 6px;
 	--bigPixelHeight: 2px;
 	--interlaceWidth: 4px solid #141a2b;
+	--uiColor: #0d635f;
 }
 
 
