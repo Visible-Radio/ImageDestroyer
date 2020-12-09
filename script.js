@@ -6,6 +6,8 @@
 // need to handle portrait oriented images somehow
 // maybe if the vertical dimension is more than 128px, crop it in the canvas
 
+// error handling, local fallback image/text
+
 //======================SHOW/HIDE description=================//
 // this is all in global scope right now
 infoVisible = true;
