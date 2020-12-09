@@ -1,12 +1,45 @@
-// break image open
-// gridContainer.children[(parseInt(gridContainer.childElementCount/2))].style.setProperty(`margin-top`, 128 +`px`);
+//TODOS
 
-// probably could improbe performance by resizing gridContainer through JS, incrementing by 12 px
-// instead of using the css transition on width
-// pixels are only going to overflow into a new row when that row has gotten 12 px wider..
+// Address responsive design issues.  Scaling elements is going to cause trouble since the script 
+// manipulates CSS variables in some places, applying pixel units
 
-// (async () => {
-//======================GET THE SOURCE IMAGE=================//	
+// need to handle portrait oriented images somehow
+// maybe if the vertical dimension is more than 128px, crop it in the canvas
+
+//======================SHOW/HIDE description=================//
+// this is all in global scope right now
+infoVisible = true;
+const gridContainer = document.querySelector('.gridContainer');
+const infoButton = document.querySelector('.info');
+const downArrow = document.querySelector('.downArrow');
+const upArrow = document.querySelector('.upArrow');
+let imgData;
+let destroyedImg;
+let divDisplay;
+
+let textPixels = [];
+infoButton.addEventListener('click', () => {
+	if (infoVisible) {
+		textPixels = Array.from(document.querySelectorAll('.textPixel'));
+		textPixels.forEach(textPixel => textPixel.classList.remove('textPixelOn'));
+		infoVisible = false;
+		downArrow.disabled = true;	
+		upArrow.disabled = true;
+		displayDrawNormal();	
+
+	} else {		
+		textPixels = Array.from(document.querySelectorAll('.textPixel'));
+		console.log(textPixels);
+		textPixels.forEach(textPixel => textPixel.classList.add('textPixelOn'));
+		infoVisible = true;
+		downArrow.disabled = false;	
+		upArrow.disabled = false;
+		displayDrawLowContrast();
+
+	}	
+});
+
+//======================GET THE SOURCE IMAGE=================//
 const img = new Image();
 // canvass doesn't like cross origin content
 // setting this prevents some errors
@@ -15,7 +48,7 @@ img.setAttribute('crossOrigin', '');
 	async function getImageCollection() {
 		try {	
 				return await fetch(
-					"https://images-api.nasa.gov/search?q=station&media_type=image&year_end=1991")		
+					"https://images-api.nasa.gov/search?q=moon&media_type=image&year_end=1991")		
 		} catch(e) {
 				// API request failed, use local fallback
 				console.log("Caught this error:", e);
@@ -30,20 +63,18 @@ img.setAttribute('crossOrigin', '');
 		await getImageCollection()
 			.then(response => response.json())
 			.then(response => respObj = response.collection.items);
-		console.log(respObj);
-		console.log("description:", respObj[srcIndex].data[0].description);
-		console.log("description length:", respObj[srcIndex].data[0].description.length);	
-		console.log("returned items: ", respObj.length);
-		console.log("srcIndex: ", srcIndex);		
-
+		
 		img.src = `${respObj[srcIndex].links[0].href}` + '?' + new Date().getTime();
-		imgDescription = respObj[srcIndex].data[0].description;
-
-		document.querySelector('.gridContainer').style.setProperty('transition-property', 'none');
-		document.documentElement.style.setProperty(
-		`--gridContainerWidthLeft`, 0 + 'px');
+		imgDescription = respObj[srcIndex].data[0].description;		
 
 		destroyDisplay();
+
+		setTimeout(() => {
+			gridContainer.style.setProperty('transition-property', 'none');
+			document.documentElement.style.setProperty(
+			`--gridContainerWidthLeft`, 0 + 'px');
+		},100);
+
 		Main(imgDescription);
 		srcIndex = respObj.length-1 > srcIndex ? srcIndex + 1 : 0;
 	}
@@ -54,15 +85,15 @@ img.setAttribute('crossOrigin', '');
 	handleRender();
 
 
-
-function Main(imgDescription) {
 // ======================== Main Program ====================//
+function Main(imgDescription) {
+
 img.onload = function() {
 	// get the canvas context
 	const ctx = document.getElementById('canvas').getContext('2d');
 	// set up the final output width of the destroyed image
 	// keep image aspect ratio intact
-	const targetWidth = 128; 
+	const targetWidth = 128; // lots of things are now hard coded around this value...
 	const scaleFactor = img.width / targetWidth;
 	const targetHeight = img.height / scaleFactor; 
 
@@ -71,25 +102,24 @@ img.onload = function() {
 	ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
 
 	// retrieve the pixel data from the canvas
-  const imageData = ctx.getImageData(0, 0, targetWidth, targetHeight);
+  imageData = ctx.getImageData(0, 0, targetWidth, targetHeight);
   
   // run the functions that reduce the bit depth and convert to grayscale  
-  const destroyedImg = destroyImg(imageData);
+  destroyedImg = destroyImg();  
 
   // for each pixel create a div
-  const gridContainer = document.querySelector('.gridContainer');
+  divDisplay = createDisplay(destroyedImg.length);
+  console.log("div grid count: ", gridContainer.childElementCount);
 
-  // color the divs based on the values from the image
-  const divDisplay = createDisplay(destroyedImg.length, gridContainer);
-  console.log(gridContainer.childElementCount);
-
-//********************************************************************
-  
-  sayHello(divDisplay, imgDescription.toUpperCase());
+//**************************TEXT HANDLING*****************************
+	handleInfo(imgDescription.toUpperCase(), divDisplay);	
 //********************************************************************
 	
-	document.querySelector('.gridContainer').style.setProperty('transition-property', 'width');	
-	displayDraw1(divDisplay, destroyedImg);
+	// re-assign the width transition property so the flex box will slowly get bigger
+	gridContainer.style.setProperty('transition-property', 'width');
+
+	// color the divs based on the values from the image
+	displayDrawLowContrast();
 
 	// set the height of the container so when items don't fit, we can hide them
 	// with overflowy: hidden;	
@@ -97,28 +127,34 @@ img.onload = function() {
 	document.documentElement.style.setProperty(
 		`--gridContainerHeight`, gridContainerHeight + 'px');
 
-	const gridContainerWidthLeft = 6 * targetWidth;
-	document.documentElement.style.setProperty(
-		`--gridContainerWidthLeft`, gridContainerWidthLeft + 'px');	
- };
+	// reset the width of the grid container for the 'loading' animation
+	setTimeout(()=> {
+		const gridContainerWidthLeft = 6 * targetWidth;
+		document.documentElement.style.setProperty(
+			`--gridContainerWidthLeft`, gridContainerWidthLeft + 'px');	
 
+	},100);
  // =====================End Main Program ====================//
-}
+}//img.onload()
+}//MAIN()
 
 
 const width = 128;
 const characterMaps = {
 	'0' : [0, 1, 2, 3, 4, width, width+3, width+4, (width*2), (width*2)+2, (width*2)+4, (width*3), (width*3)+1, (width*3)+4, (width*4), (width*4), (width*4)+1, (width*4)+2, (width*4)+3, (width*4)+4], 
-	'1': [],
-	// '2': [], 
-	// '3': [], 
-	// '4': [], 
-	// '5': [],
-	// '6': [],      
-	// '7': [],   
+	'1': [1, 2, width+2, (width*2)+2, (width*3)+2, (width*4)+1, (width*4)+2, (width*4)+3],
+	'2': [0, 1, 2, 3, 4, width+4, (width*2), (width*2)+1, (width*2)+2, (width*2)+3, (width*2)+4, (width*3), (width*4), (width*4), (width*4)+1, (width*4)+2, (width*4)+3, (width*4)+4], 
+	'3': [0, 1, 2, 3, 4, width+4, (width*2)+2, (width*2)+3, (width*2)+4, (width*3)+4, (width*4), (width*4), (width*4)+1, (width*4)+2, (width*4)+3, (width*4)+4], 
+	'4': [0, 4, width, width+4, (width*2), (width*2)+1, (width*2)+2, (width*2)+3, (width*2)+4, (width*3)+4, (width*4)+4], 
+	'5': [0, 1, 2, 3, 4, width, (width*2), (width*2)+1, (width*2)+2, (width*2)+3, (width*3)+3, (width*4), (width*4), (width*4)+1, (width*4)+2, (width*4)+3],
+	'6': [0, 1, 2, 3, 4, width, (width*2), (width*2)+1, (width*2)+2, (width*2)+3, (width*2)+4, (width*3), (width*3)+4, (width*4), (width*4), (width*4)+1, (width*4)+2, (width*4)+3, (width*4)+4],      
+	'7': [0, 1, 2, 3, 4, width+4, (width*2)+4, (width*3)+4, (width*4)+4],
 	'8': [0, 1, 2, 3, 4, width, width+4, (width*2), (width*2)+1, (width*2)+2, (width*2)+3, (width*2)+4, (width*3), (width*3)+4, (width*4), (width*4), (width*4)+1, (width*4)+2, (width*4)+3, (width*4)+4],   
-	'9': [0, 1, 2, 3, 4, width, width+4, (width*2), (width*2)+1, (width*2)+2, (width*2)+3, (width*2)+4, (width*3)+4, (width*4)+4],   	   
-	' ': [],	
+	'9': [0, 1, 2, 3, 4, width, width+4, (width*2), (width*2)+1, (width*2)+2, (width*2)+3, (width*2)+4, (width*3)+4, (width*4)+4],
+	' ': [],
+	'.': [width*4+1],
+	',': [width*4+1, (width*5)+1],
+	"'": [1, width+1],
 	A : [2, width+1, width+3, width*2, (width*2)+4, width*3, (width*3)+1, (width*3)+2, (width*3)+3,(width*3)+4, (width*4), (width*4)+4],
 	B : [0,1,2,3, width, width+4, (width*2), (width*2)+1, (width*2)+2, (width*2)+3, (width*2)+4, (width*3), (width*3)+4, width*4, (width*4)+1, (width*4)+2, (width*4)+3],
 	C : [0, 1, 2, 3, 4, width, (width*2), (width*3), (width*4), (width*4), (width*4)+1, (width*4)+2, (width*4)+3, (width*4)+4],
@@ -147,11 +183,50 @@ const characterMaps = {
 	Z : [0, 1, 2, 3, 4, width+3, (width*2)+2, (width*3)+1, (width*4), (width*4), (width*4)+1, (width*4)+2, (width*4)+3, (width*4)+4],
 }
 
-function sayHello(divDisplay, inputText) {
+function handleInfo(preSlicedText, divDisplay) {
+
+	const verticalChars = parseInt(divDisplay.length/128/6);
+	const horizontalChars = parseInt(128/6);
+	const charsPerPage = horizontalChars*verticalChars;
+	
+	let pagesArr = [];
+	let slice;
+	let charsRemaining;
+	let currentPage = 0;	
+
+	for (let i=0; i < preSlicedText.length; i += charsPerPage) {		
+			slice = preSlicedText.slice(i, charsPerPage+i);			
+			pagesArr.push(slice);
+	}		
+
+	printPage(divDisplay, pagesArr[currentPage]);
+
+	updateButtonStatus(downArrow, upArrow, currentPage, pagesArr);
+
+	downArrow.addEventListener('click', () => {
+		clearPage();
+		if (pagesArr[currentPage+1]) currentPage++;
+		printPage(divDisplay, pagesArr[currentPage]);
+		updateButtonStatus(downArrow,upArrow, currentPage, pagesArr);					
+	});
+
+	upArrow.addEventListener('click', () => {
+		clearPage();
+		if (pagesArr[currentPage-1]) currentPage--;			
+		printPage(divDisplay, pagesArr[currentPage]);
+		updateButtonStatus(downArrow,upArrow, currentPage, pagesArr);						
+	});
+
+}
+
+function printPage(divDisplay, inputText) {	
+
 	let position = 129;
 	let char;
+
 	for (let i=0; i < inputText.length; i++) {
-		char =`${inputText[i]}`;		
+		char =`${inputText[i]}`;	
+
 		if (characterMaps.hasOwnProperty(char)) {
 			writeChar(characterMaps[char], divDisplay, position);	
 		} else {
@@ -166,8 +241,19 @@ function sayHello(divDisplay, inputText) {
 	}
 }
 
+
+function clearPage() {
+	Array.from(document.querySelectorAll('.textPixel')).forEach(textPixel => textPixel.classList.remove('textPixel', 'textPixelOn'));
+}
+
 function writeChar(charDefinitionArr, divDisplay, position) {	
-	charDefinitionArr.forEach(charPixel => divDisplay[charPixel + position].classList.add('textPixel'))
+	charDefinitionArr.forEach(charPixel => divDisplay[charPixel + position].classList.add('textPixel', 'textPixelOn'));
+	infoVisible = true;	
+}
+
+function updateButtonStatus(downArrow, upArrow, currentPage, pagesArr){
+	downArrow.disabled = pagesArr[currentPage+1]===undefined ? true : false	
+	upArrow.disabled = pagesArr[currentPage-1]===undefined ? true : false;	
 }
 
 function destroyDisplay() {
@@ -189,7 +275,7 @@ function avgChannels(channels) {
 	return parseInt(channels.reduce((acc, channel) => acc += channel, 0) /3);	
 }
 
-function destroyImg(imageData) {
+function destroyImg() {
 	// iterate over the pixel data from the canvas	
 	let destroyedImg = [];	
 	for (let i=0; i < imageData.data.length; i+=4) {
@@ -206,7 +292,7 @@ function destroyImg(imageData) {
 }
 
 // build the display grid
-function createDisplay(imgArrLength, gridContainer) {
+function createDisplay(imgArrLength) {
 	for (let i = 0; i < imgArrLength; i++) {		
 		let div = document.createElement('div');
 		gridContainer.appendChild(div);
@@ -219,10 +305,10 @@ function createDisplay(imgArrLength, gridContainer) {
 function scaleDivs(divScale = 1){
 	const cssVars = {
 		divScale: divScale,
-		gridContainerWidth: 1536 * divScale,
-		bigPixelWidth: 12 * divScale,
-		bigPixelHeight: 4 * divScale,
-		interlaceWidth: 8 * divScale,
+		gridContainerWidth: 768 * divScale,
+		bigPixelWidth: 6 * divScale,
+		bigPixelHeight: 2 * divScale,
+		interlaceWidth: 4 * divScale,
 	}	
 	document.documentElement.style.setProperty(
 		`--gridContainerWidth`,
@@ -242,7 +328,7 @@ function scaleDivs(divScale = 1){
 
 //========================Drawing Functions==============================//
 
-function displayDraw1(divDisplay, destroyedImg) {
+function displayDrawNormal() {
 	let modR = 0;
 	let modG = 0;
 	let modB = 0;
@@ -254,12 +340,37 @@ function displayDraw1(divDisplay, destroyedImg) {
 		if (monoValue % (rand1 * 5) === 0
 			|| monoValue % (rand1 * 3) === 0 ) modR = rndNum(100);
 		if (monoValue % (rand2 * 3) === 0 ) modG = -rndNum(100);
-		if (monoValue < 20) monoValue -= 20;
-		if (monoValue < 200) monoValue -= 20;
+		if (monoValue < 20) monoValue -= 20;		
 		div.style=`background-color: rgba(
-		${monoValue - modR - modG},
-		${monoValue + (modR/2)},
-		${monoValue - modG},
+		${(monoValue - modR - modG)},
+		${(monoValue + (modR/2))},
+		${(monoValue - modG)},
+		1);`
+		modR-=5;
+		modG+=15;
+		if (modR <= -55 || modR >= 150) modR = 0;
+		if (modG >= 100 || modG <= -100) modG = 0;		
+		
+	});
+}
+
+function displayDrawLowContrast() {
+	let modR = 0;
+	let modG = 0;
+	let modB = 0;
+	const rand1 = rndNum(15);		
+	const rand2 = rndNum(15);		
+	divDisplay.forEach((div,i) => {
+		let monoValue = destroyedImg[i];
+		
+		if (monoValue % (rand1 * 5) === 0
+			|| monoValue % (rand1 * 3) === 0 ) modR = rndNum(100);
+		if (monoValue % (rand2 * 3) === 0 ) modG = -rndNum(100);
+		if (monoValue < 20) monoValue -= 20;		
+		div.style=`background-color: rgba(
+		${(monoValue - modR - modG)/2},
+		${(monoValue + (modR/2))/2},
+		${(monoValue - modG)/2},
 		1);`
 		modR-=5;
 		modG+=15;
@@ -273,4 +384,5 @@ function rndNum(limit) {
 	return Math.round(Math.random()*limit);	
 }
 //======================END OF DRAWING FUNCTIONS==============================//
- // })();
+
+

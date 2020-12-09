@@ -12,13 +12,23 @@ canvas {
 	display: none;
 }
 
+h1 {
+	color: #ff0081;
+	align-self: center;
+	font-family: sans-serif;
+	font-style: italic;
+	letter-spacing: 15px;
+	padding: 0 20px 0;
+	border: 5px solid #ff0081;	
+}
+
 .outerContainer {
 	display: flex;
 	flex-direction: column;
 	border: 3px solid var(--uiColor);
 	padding: 20px;
 	background-color: black;
-	border-radius: 2% 2% 10% 10%;	
+	border-radius: 4% 4% 10% 10%;	
 }
 
 .border {
@@ -29,9 +39,8 @@ canvas {
 }
 
 .layoutContainer {	
-	position:relative;	
-	z-index: 1;
-	width: var(--gridContainerWidthLeft);
+	position:relative;
+	width: 768px;
 	height: var(--gridContainerHeight);	
 	border: 5px solid var(--uiColor);	
 	padding: 5px;	
@@ -41,26 +50,27 @@ canvas {
 	display: flex;
 	flex-wrap: wrap;	
 	transition-property: width;
-	transition-duration: 2s;
+	transition-duration: 5s;
 	transition-timing-function: linear;
 	width: var(--gridContainerWidthLeft);
 	height: var(--gridContainerHeight);
 	overflow-y: hidden;
-	background-color: #36d28a;
+	/*background-color: #0b3321;	*/
 }
 
-.bigPixel {
-	opacity: 1;
+.bigPixel {		
 	border-top: var(--interlaceWidth);	
 	width: var(--bigPixelWidth);
-	height: var(--bigPixelHeight);	
+	height: var(--bigPixelHeight);
+	/*background-color: black !important;		*/
 }
 
-.textPixel {	
-	opacity: 0;	
+.textPixelOn[style] {	
+	background-color: #36d28a !important;	
+	border: none;
+	width: 6px;
+	height: 6px;	
 }
-
-
 
 .navBox {
 	display: flex;	
@@ -70,6 +80,8 @@ canvas {
 button {
 	font-size: 24px;
 	color: #218875;
+	transition-property: background-color;
+	transition-duration: 1s;
 	background-color: var(--uiColor);	
 	outline: none;	
 	height: 50px;	
@@ -94,6 +106,9 @@ span {
 	margin-top: 20px;
 }
 
+button:disabled {
+	background-color: #870505;
+}
 
 :root {
 	--gridContainerWidthLeft: 0;	
@@ -102,6 +117,8 @@ span {
 	--bigPixelHeight: 2px;
 	--interlaceWidth: 4px solid #141a2b;
 	--uiColor: #0d635f;
+	/*--displayImageVisible: 0;*/
+	/*--displayTextVisible: 1;	*/
 }
 
 
