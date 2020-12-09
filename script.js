@@ -9,7 +9,7 @@
 
 
  const epigraph1='                                                                                                                              "I photograph to find out what something   will look like       photographed"                                                                        -Garry Winogrand';
- const epigraph2='                                                                                                                              "The camera relieves us of the burden of   memory.  It surveys   us like God, and it surveys for us.  Yet no other god has been so cynical, for the camera records in.   order to forget."                         -John Berger';
+ const epigraph2='                                                                                    "The camera relieves us of the burden of   memory.  It surveys   us like God, and it surveys for us.  Yet no other god has been so cynical, for the camera records in.   order to forget."                            -John Berger,                          Uses of photography';
 
 
 
