@@ -3,10 +3,15 @@
 // Address responsive design issues.  Scaling elements is going to cause trouble since the script 
 // manipulates CSS variables in some places, applying pixel units
 
-// need to handle portrait oriented images somehow
-// maybe if the vertical dimension is more than 128px, crop it in the canvas
-
 // error handling, local fallback image/text
+
+//======================EPIGRAPH STRINGS=================//
+
+
+ const epigraph1='                                                                                                                              "I photograph to find out what something   will look like       photographed"                                                                        -Garry Winogrand';
+ const epigraph2='                                                                                                                              "The camera relieves us of the burden of   memory.  It surveys   us like God, and it surveys for us.  Yet no other god has been so cynical, for the camera records in.   order to forget."                         -John Berger';
+
+
 
 //======================SHOW/HIDE description=================//
 // this is all in global scope right now
@@ -18,6 +23,8 @@ const upArrow = document.querySelector('.upArrow');
 let imgData;
 let destroyedImg;
 let divDisplay;
+let pagesArr;
+let currentPage;	
 
 let textPixels = [];
 infoButton.addEventListener('click', () => {
@@ -30,12 +37,10 @@ infoButton.addEventListener('click', () => {
 		displayDrawNormal();	
 
 	} else {		
-		textPixels = Array.from(document.querySelectorAll('.textPixel'));
-		console.log(textPixels);
+		textPixels = Array.from(document.querySelectorAll('.textPixel'));		
 		textPixels.forEach(textPixel => textPixel.classList.add('textPixelOn'));
-		infoVisible = true;
-		downArrow.disabled = false;	
-		upArrow.disabled = false;
+		infoVisible = true;		
+		updateButtonStatus(downArrow, upArrow, currentPage, pagesArr)
 		displayDrawLowContrast();
 
 	}	
@@ -58,7 +63,7 @@ img.setAttribute('crossOrigin', '');
 		}
 	}
 
-	let srcIndex = 17;
+	let srcIndex = -2;
 	async function handleRender() {
 		let respObj;
 		let description;
@@ -66,8 +71,16 @@ img.setAttribute('crossOrigin', '');
 			.then(response => response.json())
 			.then(response => respObj = response.collection.items);
 		
-		img.src = `${respObj[srcIndex].links[0].href}` + '?' + new Date().getTime();
-		imgDescription = respObj[srcIndex].data[0].description;		
+		if (srcIndex >= 0) {
+			img.src = `${respObj[srcIndex].links[0].href}` + '?' + new Date().getTime();
+			imgDescription = respObj[srcIndex].data[0].description;		
+		} else if (srcIndex===-2) {
+			img.src = "./cosmonaut.jpg";
+			imgDescription = epigraph1;
+		} else if (srcIndex===-1) {
+			img.src = "./spaceman.jpg";
+			imgDescription = epigraph2;
+		}
 
 		destroyDisplay();
 
@@ -75,7 +88,7 @@ img.setAttribute('crossOrigin', '');
 			gridContainer.style.setProperty('transition-property', 'none');
 			document.documentElement.style.setProperty(
 			`--gridContainerWidthLeft`, 0 + 'px');
-		},100);
+		},0);
 
 		Main(imgDescription);
 		srcIndex = respObj.length-1 > srcIndex ? srcIndex + 1 : 0;
@@ -97,14 +110,16 @@ img.onload = function() {
 	// keep image aspect ratio intact
 	const targetWidth = 128; // lots of things are now hard coded around this value...
 	const scaleFactor = img.width / targetWidth;
-	const targetHeight = img.height / scaleFactor; 
+	const targetHeight = img.height / scaleFactor;
 
 	// input scaling happens here based on second pair of args
 	// this draws the image onto the canvas, which is hidden using CSS
-	ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+	ctx.drawImage(img, 0, 0, targetWidth, 128);
+
+	// ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
 
 	// retrieve the pixel data from the canvas
-  imageData = ctx.getImageData(0, 0, targetWidth, targetHeight);
+  imageData = ctx.getImageData(0, 0, targetWidth, 128);
   
   // run the functions that reduce the bit depth and convert to grayscale  
   destroyedImg = destroyImg();  
@@ -125,9 +140,9 @@ img.onload = function() {
 
 	// set the height of the container so when items don't fit, we can hide them
 	// with overflowy: hidden;	
-	const gridContainerHeight = (2 + 4) * parseInt(targetHeight);
-	document.documentElement.style.setProperty(
-		`--gridContainerHeight`, gridContainerHeight + 'px');
+	// const gridContainerHeight = (2 + 4) * parseInt(128);
+	// document.documentElement.style.setProperty(
+	// 	`--gridContainerHeight`, gridContainerHeight + 'px');
 
 	// reset the width of the grid container for the 'loading' animation
 	setTimeout(()=> {
@@ -157,6 +172,9 @@ const characterMaps = {
 	'.': [width*4+1],
 	',': [width*4+1, (width*5)+1],
 	"'": [1, width+1],
+	'"': [1, 3, width+1, width+3],
+	'-': [(width*2)+1, (width*2)+2, (width*2)+3],
+	':': [width+2, (width*3)+2],
 	A : [2, width+1, width+3, width*2, (width*2)+4, width*3, (width*3)+1, (width*3)+2, (width*3)+3,(width*3)+4, (width*4), (width*4)+4],
 	B : [0,1,2,3, width, width+4, (width*2), (width*2)+1, (width*2)+2, (width*2)+3, (width*2)+4, (width*3), (width*3)+4, width*4, (width*4)+1, (width*4)+2, (width*4)+3],
 	C : [0, 1, 2, 3, 4, width, (width*2), (width*3), (width*4), (width*4), (width*4)+1, (width*4)+2, (width*4)+3, (width*4)+4],
@@ -166,7 +184,7 @@ const characterMaps = {
 	G : [0, 1, 2, 3, 4, width, (width*2), (width*2)+2, (width*2)+3, (width*2)+4, (width*3), (width*3)+4, (width*4), (width*4), (width*4)+1, (width*4)+2, (width*4)+3, (width*4)+4],
 	H : [0, 4, width, width+4, (width*2), (width*2)+1, (width*2)+2, (width*2)+3, (width*2)+4, (width*3), (width*3)+4, (width*4), (width*4),(width*4)+4],
 	I : [0, 1, 2, 3, 4, width+2, (width*2)+2, (width*3)+2, (width*4), (width*4), (width*4)+1, (width*4)+2, (width*4)+3, (width*4)+4],
-	J : [width+4, width*3, (width*2)+4, (width*3)+4, (width*4), (width*4)+1, (width*4)+2, (width*4)+3, (width*4)+4],
+	J : [4, width+4, width*3, (width*2)+4, (width*3)+4, (width*4), (width*4)+1, (width*4)+2, (width*4)+3, (width*4)+4],
 	K : [0, 4, width, width+3, (width*2), (width*2)+1, (width*2)+2, (width*3), (width*3)+3, (width*4), (width*4),(width*4)+4],
 	L : [0, width, (width*2), (width*3), (width*4), (width*4), (width*4)+1, (width*4)+2, (width*4)+3, (width*4)+4],
 	M : [0, 4, width, width+1, width+3, width+4, (width*2), (width*2)+2, (width*2)+4, (width*3), (width*3)+4, (width*4), (width*4),(width*4)+4],
@@ -190,11 +208,11 @@ function handleInfo(preSlicedText, divDisplay) {
 	const verticalChars = parseInt(divDisplay.length/128/6);
 	const horizontalChars = parseInt(128/6);
 	const charsPerPage = horizontalChars*verticalChars;
-	
-	let pagesArr = [];
+		
 	let slice;
 	let charsRemaining;
-	let currentPage = 0;	
+	pagesArr = [];
+	currentPage = 0;	
 
 	for (let i=0; i < preSlicedText.length; i += charsPerPage) {		
 			slice = preSlicedText.slice(i, charsPerPage+i);			

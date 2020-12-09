@@ -1,11 +1,32 @@
-body {
+body {	
+	background-color: #151c31;
+	margin: 0;
+	padding: 0;
+
+}
+
+@media only screen and (max-height: 900px) {
+  .pageContainer {
+    /*for macbook screen*/
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;	
+		background-color: #151c31;
+		transform: scale(0.75);
+		height: 110vh;		
+	}
+ }
+
+/*for larger screens*/
+.pageContainer {	
+	padding: 0;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
-	align-items: center;
-	/*height: 90vh;*/
-	background-color: #151c31;
-	transform: scale(1);
+	align-items: center;	
+	background-color: #151c31;			
 }
 
 canvas {
@@ -54,15 +75,13 @@ h1 {
 	transition-timing-function: linear;
 	width: var(--gridContainerWidthLeft);
 	height: var(--gridContainerHeight);
-	overflow-y: hidden;
-	/*background-color: #0b3321;	*/
+	overflow-y: hidden;	
 }
 
 .bigPixel {		
 	border-top: var(--interlaceWidth);	
 	width: var(--bigPixelWidth);
-	height: var(--bigPixelHeight);
-	/*background-color: black !important;		*/
+	height: var(--bigPixelHeight);	
 }
 
 .textPixelOn[style] {	
@@ -117,7 +136,7 @@ p {
 }
 :root {
 	--gridContainerWidthLeft: 0;	
-	--gridContainerHeight: 0; 	 
+	--gridContainerHeight: 768px; 	 
 	--bigPixelWidth: 6px;
 	--bigPixelHeight: 2px;
 	--interlaceWidth: 4px solid #141a2b;
