@@ -1,37 +1,7 @@
-## Welcome to GitHub Pages
+# ImageDestroyer
 
-You can use the [editor on GitHub](https://github.com/Visible-Radio/ImageDestroyer/edit/apiConnected/README.md) to maintain and preview the content for your website in Markdown files.
+When I took CS50 in 2020, I was fascinated by a series of projects related to iterating through information representing image data. My background in photography probably accounts for this fascination. Looping through image data made me feel close to the material of the image itself in a way that was familiar from my days spent in the darkroom and in photoshop.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+In one CS50 project, we had to search for jpeg headers in a disk image to recover lost images. In another we implemented a series of filter algorithms which mutated image information pixel by pixel. Doing this in C was exciting due to all the trouble you can get into with pointers or otherwise accessing the wrong area in memory. It felt like being close to the materiality of the machine.
 
-### Markdown
-
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
-
-```markdown
-Syntax highlighted code block
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/Visible-Radio/ImageDestroyer/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+I wanted to try a similar project in Javascript. Image Destroyer reads pixel data from a canvas element, and renders a div element for every pixel. By constraining the divs in a flexible container, they form a grid, and when the width of this flexible container corresponds to the width of the original image, the 'div image' resolves. By manipulating this width, it is possible to scramble the image. The text is rendered in the same grid, by calculating from a string which divs should be assigned a special 'text pixel' class. Obviously this is not the most efficient way of rendering text or images, but I was excited by the visual effect of it.
